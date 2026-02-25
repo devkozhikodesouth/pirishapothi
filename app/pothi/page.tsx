@@ -12,22 +12,27 @@ const page = () => {
       style={{
         background: `
           radial-gradient(circle at top left, #F6EED6 0%, transparent 45%),
-          radial-gradient(circle at bottom right, #C9482B 0%, transparent 40%),
-          linear-gradient(135deg, #EFE6C8 0%, #E6C7A8 50%, #8A5A2B 100%)
+          radial-gradient(circle at bottom right, #F6EED6 0%, transparent 40%),
+          linear-gradient(135deg, #EFE6C8 0%, #F6EED6 50%, #F6EED6 100%)
         `,
       }}
     >
       {/* Poster */}
       <Flex
+      className="relative"
         width={{ initial: "100%", md: "50%" }}
         align="center"
         justify="center"
-        mb={{ initial: "7", md: "0" }}
+
       >
         <img
           src="/images/title.png"
           alt="TITLE"
-          className=" w-full  drop-shadow-2xl p-10"
+          className=" w-full  drop-shadow-2xl p-10 -mt-30"
+        />
+        <img className="absolute bottom-10 md:left-50  md:w-[300px] w-[200px] h-auto" 
+          src="/images/box.png"
+          alt="box"
         />
       </Flex>
 
