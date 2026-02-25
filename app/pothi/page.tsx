@@ -28,16 +28,16 @@ const page = () => {
         <img
           src="/images/title.png"
           alt="TITLE"
-          className=" w-full  drop-shadow-2xl p-10 -mt-30"
+          className=" w-full  drop-shadow-2xl p-10 -mt-10 md:-mt-30"
         />
-        <img className="absolute bottom-10 md:left-50  md:w-[300px] w-[200px] h-auto" 
+        <img className="absolute -bottom-20 md:bottom-10 md:left-50  md:w-[300px] w-[200px] h-auto" 
           src="/images/box.png"
           alt="box"
         />
       </Flex>
 
       {/* Form */}
-      <Flex
+      <Flex mt={{initial:"20%",md:"0"}}
         width={{ initial: "100%", md: "50%" }}  
         align="center"
         justify="center"
