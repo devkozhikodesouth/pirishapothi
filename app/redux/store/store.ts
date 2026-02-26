@@ -4,11 +4,16 @@ import { configureStore } from "@reduxjs/toolkit";
 import sectorReducer from '../Slice/sectorSlice';
 import bookingReducer from '../Slice/bookingSlice';
 import unitReducer from '../Slice/unitSlice';
+import getBookingReducer from '../Slice/getBookingSlice';
+import authReducer from '../Slice/authSlice';
    const store = configureStore({
     reducer: {  
         booking: bookingReducer ,    
         sector: sectorReducer,
-        unit: unitReducer
+        unit: unitReducer,
+        getBooking: getBookingReducer,
+        auth: authReducer,
+        
     }   
     });
 

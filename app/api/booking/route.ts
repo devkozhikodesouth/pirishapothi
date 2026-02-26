@@ -49,3 +49,56 @@ export async function POST(request: Request) {
     );
   }
 }
+
+// app/api/admin/bookings/route.ts
+
+export async function GET(req: Request) {
+  try {
+    await connectDB();
+
+    const { searchParams } = new URL(req.url);
+
+    const page = Number(searchParams.get("page") || 1);
+    const limit = Number(searchParams.get("limit") || 10);
+    const skip = (page - 1) * limit;
+
+    const search = searchParams.get("search");
+    const sector = searchParams.get("sector");
+    const unit = searchParams.get("unit");
+
+    const query: any = {};
+
+    if (search) {
+      query.$or = [
+        { name: new RegExp(search, "i") },
+        { phone: new RegExp(search, "i") },
+        { place: new RegExp(search, "i") },
+      ];
+    }
+    if (sector) query.sector = sector;
+    if (unit) query.unit = unit;
+
+    const [data, total] = await Promise.all([
+      Booking.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      Booking.countDocuments(query),
+    ]);
+
+    return NextResponse.json({
+      data,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Fetch bookings error:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch bookings" },
+      { status: 500 }
+    );
+  }
+}

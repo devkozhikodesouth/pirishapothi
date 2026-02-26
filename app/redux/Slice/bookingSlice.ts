@@ -13,10 +13,19 @@ export type BookingForm = {
   unit: string;
 };
 
+export type Booking = BookingForm & {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
 type BookingState = BookingForm & {
   loading: boolean;
   error: string | null;
   success: boolean;
+  bookings: Booking[];
+  fetchLoading: boolean;
+  fetchError: string | null;
 };
 
 /* -----------------------------
@@ -46,6 +55,29 @@ export const bookingThunk = createAsyncThunk<
 });
 
 /* -----------------------------
+   Async Thunk (GET)
+------------------------------ */
+
+export const fetchBookingsThunk = createAsyncThunk<
+  Booking[],
+  void,
+  { rejectValue: string }
+>("booking/fetchAll", async (_, { rejectWithValue }) => {
+  try {
+    const response = await fetch("/api/booking");
+    const result = await response.json();
+
+    if (!response.ok) {
+      return rejectWithValue(result?.message || "Failed to fetch bookings");
+    }
+
+    return result.data as Booking[];
+  } catch (error: any) {
+    return rejectWithValue(error.message || "Network error");
+  }
+});
+
+/* -----------------------------
    Initial State
 ------------------------------ */
 
@@ -59,6 +91,9 @@ const initialState: BookingState = {
   loading: false,
   error: null,
   success: false,
+  bookings: [],
+  fetchLoading: false,
+  fetchError: null,
 };
 
 /* -----------------------------
@@ -89,6 +124,19 @@ const bookingSlice = createSlice({
       .addCase(bookingThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Something went wrong";
+      })
+      // fetchBookingsThunk cases
+      .addCase(fetchBookingsThunk.pending, (state) => {
+        state.fetchLoading = true;
+        state.fetchError = null;
+      })
+      .addCase(fetchBookingsThunk.fulfilled, (state, action) => {
+        state.fetchLoading = false;
+        state.bookings = action.payload;
+      })
+      .addCase(fetchBookingsThunk.rejected, (state, action) => {
+        state.fetchLoading = false;
+        state.fetchError = action.payload || "Failed to fetch bookings";
       });
   },
 });

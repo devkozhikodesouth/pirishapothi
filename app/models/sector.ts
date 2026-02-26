@@ -6,5 +6,5 @@ const sectorSchema = new mongoose.Schema({
     timeStamp: { type: Date, default: Date.now }   
 });
 
-const Sector =  mongoose.model("Sector", sectorSchema);
+const Sector = mongoose.models.Sector || mongoose.model("Sector", sectorSchema);
 export default Sector;
