@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import Sector from "@/app/models/sector";
 import Unit from "@/app/models/unit";
+import { connectDB } from "@/app/lib/mongodb";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ sectorName: string }> }
 ) {
   try {
+    await connectDB();
 
 
     // ✅ IMPORTANT: unwrap params first

@@ -4,6 +4,7 @@ import { fetchSectors } from "./sectorSlice";
 export const fetchUnits = createAsyncThunk(
   "unit/fetchUnits",
   async (sectorName:string,{ rejectWithValue }) => {
+    if (!sectorName || sectorName === 'others') return [];
  try {
   console.log(sectorName)
      const res = await fetch(`/api/unit/${sectorName}`);

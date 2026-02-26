@@ -1,8 +1,10 @@
 import Sector from "@/app/models/sector";
 import { NextResponse } from "next/server";
+import { connectDB } from "@/app/lib/mongodb";
 
 export async function GET() {
   try {
+    await connectDB();
     const sectors = await Sector.find({}).lean();
 
     return NextResponse.json(sectors, {

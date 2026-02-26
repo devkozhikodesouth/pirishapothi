@@ -1,7 +1,34 @@
-'use client';
+"use client";
+import { motion, Variants } from "framer-motion";
 import { Flex } from "@radix-ui/themes";
 import BookingPage from "./BookingPage";
 
+const posterVariant: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
+
+const boxVariant: Variants = {
+  hidden: { opacity: 0, scale: 0.85 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.5, delay: 0.3, ease: "easeOut" },
+  },
+};
+
+const formVariant: Variants = {
+  hidden: { opacity: 0, x: 40 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.6, delay: 0.2, ease: "easeOut" },
+  },
+};
 const page = () => {
   return (
     <Flex
@@ -19,32 +46,46 @@ const page = () => {
     >
       {/* Poster */}
       <Flex
-      className="relative"
+        className="relative"
         width={{ initial: "100%", md: "50%" }}
         align="center"
         justify="center"
-
       >
-        <img
-          src="/images/title.png"
-          alt="TITLE"
-          className=" w-full  drop-shadow-2xl p-10 -mt-10 md:-mt-30"
-        />
-        <img className="absolute -bottom-20 md:bottom-10 md:left-50  md:w-[300px] w-[200px] h-auto" 
-          src="/images/box.png"
-          alt="box"
-        />
+        <motion.div
+          variants={posterVariant}
+          initial="hidden"
+          animate="visible"
+          className="w-full flex items-center justify-center relative"
+        >
+          <img
+            src="/images/title.png"
+            alt="TITLE"
+            className="w-full absolute drop-shadow-2xl  p-10 md:p-2 mt-30 md:-mt-30"
+          />
+
+          <motion.img
+            variants={boxVariant}
+            initial="hidden"
+            animate="visible"
+            className="absolute -bottom-60 md:-bottom-70 md:left-50 md:w-[350px] w-[200px] h-auto"
+            src="/images/box.png"
+            alt="box"
+          />
+        </motion.div>
       </Flex>
+<Flex direction={'column'} justify={'center'} align={'center'} width={{initial:'100%',md:'50%'}}>
 
       {/* Form */}
-      <Flex mt={{initial:"20%",md:"0"}}
-        width={{ initial: "100%", md: "50%" }}  
-        align="center"
-        justify="center"
+      <motion.div
+        variants={formVariant}
+        initial="hidden"
+        animate="visible"
+        className="w-full flex items-center  justify-center mt-[50%] md:mt-0"
       >
         <BookingPage />
-      </Flex>
+      </motion.div>
     </Flex>
+        </Flex>
   );
 };
 

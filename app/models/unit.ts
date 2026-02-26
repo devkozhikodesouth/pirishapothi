@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
-import { connectDB } from "@/app/lib/mongodb";
 
-await connectDB();
 const unitSchema = new mongoose.Schema({
   unitName: { type: String, required: true },
   sectorId: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Select } from "@radix-ui/themes";
+import { Select, Text } from "@radix-ui/themes";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSectors } from "@/app/redux/Slice/sectorSlice";
@@ -27,6 +27,9 @@ export default function RadixSelect({
 
   return (
     <>
+        <Text size="2" weight="medium" className="text-[#7A4A1F]">
+              Select Sector
+            </Text>
       <Select.Root
         size={"3"}
         value={formData.sector || ""}

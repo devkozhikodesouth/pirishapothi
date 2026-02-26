@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import Booking from "@/app/models/booking";
+import { connectDB } from "@/app/lib/mongodb";
 
 export async function POST(request: Request) {
   try {
+    await connectDB();
 
     const body = await request.json();
     console.log("Booking payload:", body);

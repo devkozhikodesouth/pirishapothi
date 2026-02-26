@@ -20,6 +20,7 @@ function FirstPart({
   return (
     <>
       <FormInput
+    
         value={formData.name}
         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         name="Full Name"
