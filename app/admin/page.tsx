@@ -126,6 +126,7 @@ export default function BookingsTable({ setTotalCount }: any) {
             <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Phone</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Place</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Order Count</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Sector</Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Unit</Table.ColumnHeaderCell>
           </Table.Row>
@@ -137,6 +138,7 @@ export default function BookingsTable({ setTotalCount }: any) {
               <Table.Cell>{b.name}</Table.Cell>
               <Table.Cell>{b.phone}</Table.Cell>
               <Table.Cell>{b.place}</Table.Cell>
+              <Table.Cell>{b.orderCount}</Table.Cell>
               <Table.Cell>{b.sector}</Table.Cell>
               <Table.Cell>{b.unit}</Table.Cell>
             </Table.Row>
@@ -144,7 +146,7 @@ export default function BookingsTable({ setTotalCount }: any) {
 
           {!loading && list.length === 0 && (
             <Table.Row>
-              <Table.Cell colSpan={5}>
+              <Table.Cell colSpan={6}>
                 <Text align="center" style={{ display: 'block', padding: '20px' }}>No results found</Text>
               </Table.Cell>
             </Table.Row>
@@ -152,7 +154,7 @@ export default function BookingsTable({ setTotalCount }: any) {
 
           {loading && list.length === 0 && (
              <Table.Row>
-              <Table.Cell colSpan={5}>
+              <Table.Cell colSpan={6}>
                 <Text align="center" style={{ display: 'block', padding: '20px' }} color="gray">Loading...</Text>
               </Table.Cell>
              </Table.Row>

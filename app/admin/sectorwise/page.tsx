@@ -53,6 +53,7 @@ export default function SectorWisePage() {
 
   // Calculate totals for footer
   const overallBookings = data.reduce((acc, curr) => acc + curr.totalBookings, 0);
+  const overallOrders = data.reduce((acc, curr) => acc + curr.totalOrders, 0);
 
   const handleShare = async () => {
 let shareText = 
@@ -68,12 +69,13 @@ if (data.length === 0) {
   shareText += "❌ No sectors found.\n";
 } else {
   data.forEach(item => {
-    shareText += `📍 ${item.sector || "Unspecified"} : ${item.totalBookings}\n`;
+    shareText += `📍 ${item.sector || "Unspecified"} : B-${item.totalBookings} | O-${item.totalOrders}\n`;
   });
 }
 
 shareText += `
 ✅ *Total Bookings : ${overallBookings}*
+📦 *Total Orders : ${overallOrders}*
 
 🔗 poonoorsahityotsav.online
 
@@ -125,6 +127,7 @@ if (navigator.share) {
             <Table.Row>
               <Table.ColumnHeaderCell>Sector Name</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell align="right">Total Bookings</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">Total Orders</Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
 
@@ -140,6 +143,7 @@ if (navigator.share) {
                 <Table.Row key={index}>
                   <Table.RowHeaderCell>{item.sector || 'Unspecified'}</Table.RowHeaderCell>
                   <Table.Cell align="right">{item.totalBookings}</Table.Cell>
+                  <Table.Cell align="right">{item.totalOrders}</Table.Cell>
                 </Table.Row>
               ))
             )}
@@ -148,6 +152,7 @@ if (navigator.share) {
               <Table.Row style={{ backgroundColor: "var(--gray-3)" }}>
                 <Table.RowHeaderCell><Text weight="bold">Total</Text></Table.RowHeaderCell>
                 <Table.Cell align="right"><Text weight="bold">{overallBookings}</Text></Table.Cell>
+                <Table.Cell align="right"><Text weight="bold">{overallOrders}</Text></Table.Cell>
               </Table.Row>
             )}
           </Table.Body>

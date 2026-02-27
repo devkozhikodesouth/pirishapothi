@@ -11,13 +11,16 @@ export async function GET() {
         $group: {
           _id: "$sector",
           totalBookings: { $sum: 1 },
+          totalOrders: { $sum: "$orderCount" },
         },
       },
       {
         $project: {
           _id: 0,
           sector: "$_id",
-          totalBookings: 1,        },
+          totalBookings: 1,
+          totalOrders: 1,
+        },
       },
       {
         $sort: { sector: 1 }, 

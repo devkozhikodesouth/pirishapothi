@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 interface UnitData {
   unit: string;
   totalBookings: number;
+  totalOrders: number;
 }
 
 export default function UnitWisePage() {
@@ -36,6 +37,7 @@ export default function UnitWisePage() {
 
   // Calculate totals for footer
   const overallBookings = data.reduce((acc, curr) => acc + curr.totalBookings, 0);
+  const overallOrders = data.reduce((acc, curr) => acc + curr.totalOrders, 0);
 
   const handleShare = async () => {
 let shareText = 
@@ -51,12 +53,13 @@ if (data.length === 0) {
   shareText += "❌ No units found.\n";
 } else {
   data.forEach(item => {
-    shareText += `📍 ${item.unit || "Unspecified"} : ${item.totalBookings}\n`;
+    shareText += `📍 ${item.unit || "Unspecified"} : B-${item.totalBookings} | O-${item.totalOrders}\n`;
   });
 }
 
 shareText += `
 ✅ *Total Bookings : ${overallBookings}*
+📦 *Total Orders : ${overallOrders}*
 
 🔗 poonoorsahityotsav.online
 
@@ -124,13 +127,14 @@ if (navigator.share) {
             <Table.Row>
               <Table.ColumnHeaderCell>Unit Name</Table.ColumnHeaderCell>
               <Table.ColumnHeaderCell align="right">Total Bookings</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">Total Orders</Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
 
           <Table.Body>
             {data.length === 0 ? (
               <Table.Row>
-                <Table.Cell colSpan={2} style={{ textAlign: "center", padding: "2rem" }}>
+                <Table.Cell colSpan={3} style={{ textAlign: "center", padding: "2rem" }}>
                   <Text color="gray">No units found</Text>
                 </Table.Cell>
               </Table.Row>
@@ -139,6 +143,7 @@ if (navigator.share) {
                 <Table.Row key={index}>
                   <Table.RowHeaderCell>{item.unit || 'Unspecified'}</Table.RowHeaderCell>
                   <Table.Cell align="right">{item.totalBookings}</Table.Cell>
+                  <Table.Cell align="right">{item.totalOrders}</Table.Cell>
                 </Table.Row>
               ))
             )}
@@ -147,6 +152,7 @@ if (navigator.share) {
               <Table.Row style={{ backgroundColor: "var(--gray-3)" }}>
                 <Table.RowHeaderCell><Text weight="bold">Total</Text></Table.RowHeaderCell>
                 <Table.Cell align="right"><Text weight="bold">{overallBookings}</Text></Table.Cell>
+                <Table.Cell align="right"><Text weight="bold">{overallOrders}</Text></Table.Cell>
               </Table.Row>
             )}
           </Table.Body>

@@ -11,6 +11,7 @@ export async function GET() {
         $group: {
           _id: "$unit",
           totalBookings: { $sum: 1 },
+          totalOrders: { $sum: "$orderCount" },
         },
       },
       {
@@ -18,6 +19,7 @@ export async function GET() {
           _id: 0,
           unit: "$_id",
           totalBookings: 1,
+          totalOrders: 1,
         },
       },
       {
