@@ -102,13 +102,20 @@ export default function BookingsTable({ setTotalCount }: any) {
 
 📊 *Bookings List*
 
+
 `;
+if(sector !== "all"){
+  shareText += `📍 *Sector : ${sector}*\n`;
+}
+if(unit !== "all"){
+  shareText += `📍 *Unit : ${unit}*\n\n`;
+}
 
     if (list.length === 0) {
       shareText += "❌ No bookings found.\n";
     } else {
       list.forEach((b: any) => {
-        shareText += `👤 ${b.name} | 📍 ${b.place} | O-${b.orderCount}\n`;
+        shareText += `👤 ${b.name} ${b.place} - ${b.orderCount}\n`;
       });
     }
 
