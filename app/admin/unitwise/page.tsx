@@ -38,41 +38,51 @@ export default function UnitWisePage() {
   const overallBookings = data.reduce((acc, curr) => acc + curr.totalBookings, 0);
 
   const handleShare = async () => {
-    let shareText = "*Unit-Wise Summary*\n";
-    shareText += "--------------------\n";
-    
-    if (data.length === 0) {
-      shareText += "No units found.\n";
-    } else {
-      data.forEach(item => {
-        shareText += `${item.unit || 'Unspecified'}: ${item.totalBookings}\n`;
-      });
-    }
-    
-    shareText += "--------------------\n";
-    shareText += `*Total Bookings: ${overallBookings}*`;
+let shareText = 
+`🌙✨ *പെരുന്നാൾ പിരിശം – സാഹിത്യോത്സവിനൊപ്പം* ✨🌙
 
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Prisha Pothi - Unit Wise",
-          text: shareText,
-        });
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
-    } else {
-      // Fallback for browsers that don't support Web Share API
-      try {
-        await navigator.clipboard.writeText(shareText);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-      } catch (err) {
-        console.error("Failed to copy text: ", err);
-      }
-    }
-  };
+*പിരിശപ്പൊതി* 🎁
 
+📊 *Unit-Wise Summary*
+
+`;
+
+if (data.length === 0) {
+  shareText += "❌ No units found.\n";
+} else {
+  data.forEach(item => {
+    shareText += `📍 ${item.unit || "Unspecified"} : ${item.totalBookings}\n`;
+  });
+}
+
+shareText += `
+✅ *Total Bookings : ${overallBookings}*
+
+🔗 poonoorsahityotsav.online
+
+©️ Lit Crew – Sahityotsav @ Poonoor
+`;
+
+if (navigator.share) {
+  try {
+    await navigator.share({
+      title: "",
+      text: shareText,
+    });
+  } catch (err) {
+    console.error("Error sharing:", err);
+  }
+} else {
+  // Fallback for browsers that don't support Web Share API
+  try {
+    await navigator.clipboard.writeText(shareText);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  } catch (err) {
+    console.error("Failed to copy text:", err);
+  }
+}  
+}
   if (loading) {
     return (
       <Flex align="center" justify="center" style={{ height: "400px" }}>
