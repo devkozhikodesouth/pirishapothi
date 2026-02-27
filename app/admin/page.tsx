@@ -8,6 +8,7 @@ import {
   Table,
   Button,
 } from "@radix-ui/themes";
+import { ArrowUp, ArrowDown, ArrowUpDown, Share2, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/app/redux/store/store";
@@ -32,6 +33,8 @@ export default function BookingsTable({ setTotalCount }: any) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sector, setSector] = useState("all");
   const [unit, setUnit] = useState("all");
+  const [sortConfig, setSortConfig] = useState<{ field: string; order: "asc" | "desc" } | null>({ field: "createdAt", order: "desc" });
+  const [isCopied, setIsCopied] = useState(false);
 
   // Fetch initial sectors
   useEffect(() => {
@@ -53,9 +56,11 @@ export default function BookingsTable({ setTotalCount }: any) {
         search: searchQuery,
         sector: sector === "all" ? "" : sector,
         unit: unit === "all" ? "" : unit,
+        sortField: sortConfig?.field,
+        sortOrder: sortConfig?.order,
       })
     );
-  }, [dispatch, page, searchQuery, sector, unit]);
+  }, [dispatch, page, searchQuery, sector, unit, sortConfig]);
 
   // Debounced search for Place
   const handleSearch = useDebouncedCallback((value: string) => {
@@ -72,6 +77,71 @@ export default function BookingsTable({ setTotalCount }: any) {
   const handleUnitChange = (value: string) => {
     setUnit(value);
     dispatch(setPage(1));
+  };
+
+  const handleSort = (field: string) => {
+    setSortConfig((prev) => {
+      if (prev?.field === field) {
+        return { field, order: prev.order === "asc" ? "desc" : "asc" };
+      }
+      return { field, order: "asc" };
+    });
+    dispatch(setPage(1));
+  };
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortConfig?.field !== field) return <ArrowUpDown size={14} className="text-gray-400 opacity-50 ml-1 inline" />;
+    return sortConfig.order === "asc" ? <ArrowUp size={14} className="ml-1 inline" /> : <ArrowDown size={14} className="ml-1 inline" />;
+  };
+
+  const handleShare = async () => {
+    let shareText = 
+`🌙✨ *പെരുന്നാൾ പിരിശം – സാഹിത്യോത്സവിനൊപ്പം* ✨🌙
+
+*പിരിശപ്പൊതി* 🎁
+
+📊 *Bookings List*
+
+`;
+
+    if (list.length === 0) {
+      shareText += "❌ No bookings found.\n";
+    } else {
+      list.forEach((b: any) => {
+        shareText += `👤 ${b.name} | 📍 ${b.place} | O-${b.orderCount}\n`;
+      });
+    }
+
+    const pageBookings = list.length;
+    const pageOrders = list.reduce((acc: any, b: any) => acc + b.orderCount, 0);
+
+    shareText += `
+✅ *Page Bookings : ${pageBookings}*
+📦 *Page Orders : ${pageOrders}*
+
+🔗 poonoorsahityotsav.online
+
+©️ Lit Crew – Sahityotsav @ Poonoor
+`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "",
+          text: shareText,
+        });
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareText);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy text:", err);
+      }
+    }  
   };
 
   return (
@@ -117,18 +187,50 @@ export default function BookingsTable({ setTotalCount }: any) {
           }}
           defaultValue={searchQuery}
         />
+
+        <Button variant="soft" onClick={handleShare} disabled={list.length === 0}>
+          {isCopied ? (
+            <>
+              <Check size={16} /> Copied!
+            </>
+          ) : (
+            <>
+              <Share2 size={16} /> Share List
+            </>
+          )}
+        </Button>
       </Flex>
 
       {/* TABLE */}
       <Table.Root variant="surface">
         <Table.Header>
           <Table.Row>
-            <Table.ColumnHeaderCell>Name</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("name")}>
+                Name <SortIcon field="name" />
+              </div>
+            </Table.ColumnHeaderCell>
             <Table.ColumnHeaderCell>Phone</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Place</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Order Count</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Sector</Table.ColumnHeaderCell>
-            <Table.ColumnHeaderCell>Unit</Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("place")}>
+                Place <SortIcon field="place" />
+              </div>
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("orderCount")}>
+                Order Count <SortIcon field="orderCount" />
+              </div>
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("sector")}>
+                Sector <SortIcon field="sector" />
+              </div>
+            </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>
+              <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("unit")}>
+                Unit <SortIcon field="unit" />
+              </div>
+            </Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 

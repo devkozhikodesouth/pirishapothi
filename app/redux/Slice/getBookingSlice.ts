@@ -26,6 +26,8 @@ export const fetchBookings = createAsyncThunk(
       search?: string;
       sector?: string;
       unit?: string;
+      sortField?: string;
+      sortOrder?: string;
     },
     { rejectWithValue }
   ) => {
@@ -36,6 +38,8 @@ export const fetchBookings = createAsyncThunk(
         ...(params.search && { search: params.search }),
         ...(params.sector && { sector: params.sector }),
         ...(params.unit && { unit: params.unit }),
+        ...(params.sortField && { sortField: params.sortField }),
+        ...(params.sortOrder && { sortOrder: params.sortOrder }),
       });
 
       const res = await fetch(`/api/booking?${query}`);

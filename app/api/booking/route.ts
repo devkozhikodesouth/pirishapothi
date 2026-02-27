@@ -66,6 +66,9 @@ export async function GET(req: Request) {
     const sector = searchParams.get("sector");
     const unit = searchParams.get("unit");
 
+    const sortField = searchParams.get("sortField") || "createdAt";
+    const sortOrder = searchParams.get("sortOrder") === "asc" ? 1 : -1;
+
     const query: any = {};
 
     if (search) {
@@ -80,7 +83,7 @@ export async function GET(req: Request) {
 
     const [data, total] = await Promise.all([
       Booking.find(query)
-        .sort({ createdAt: -1 })
+        .sort({ [sortField]: sortOrder })
         .skip(skip)
         .limit(limit),
       Booking.countDocuments(query),

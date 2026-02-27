@@ -1,8 +1,8 @@
 "use client";
 
 import { Box, Card, Flex, Heading, Table, Text, Button } from "@radix-ui/themes";
-import { Share2, Check } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Share2, Check, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 
 interface UnitData {
   unit: string;
@@ -15,6 +15,7 @@ export default function UnitWisePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof UnitData; direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,9 +36,36 @@ export default function UnitWisePage() {
     fetchData();
   }, []);
 
+  const sortedData = useMemo(() => {
+    let sortableData = [...data];
+    if (sortConfig !== null) {
+      sortableData.sort((a, b) => {
+        const aValue = a[sortConfig.key];
+        const bValue = b[sortConfig.key];
+        if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableData;
+  }, [data, sortConfig]);
+
   // Calculate totals for footer
-  const overallBookings = data.reduce((acc, curr) => acc + curr.totalBookings, 0);
-  const overallOrders = data.reduce((acc, curr) => acc + curr.totalOrders, 0);
+  const overallBookings = sortedData.reduce((acc, curr) => acc + curr.totalBookings, 0);
+  const overallOrders = sortedData.reduce((acc, curr) => acc + curr.totalOrders, 0);
+
+  const handleSort = (key: keyof UnitData) => {
+    let direction: 'asc' | 'desc' = 'desc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'desc') {
+      direction = 'asc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const SortIcon = ({ columnKey }: { columnKey: keyof UnitData }) => {
+    if (sortConfig?.key !== columnKey) return <ArrowUpDown size={14} className="text-gray-400 opacity-50 ml-1 inline" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp size={14} className="ml-1 inline" /> : <ArrowDown size={14} className="ml-1 inline" />;
+  };
 
   const handleShare = async () => {
 let shareText = 
@@ -49,10 +77,10 @@ let shareText =
 
 `;
 
-if (data.length === 0) {
+if (sortedData.length === 0) {
   shareText += "❌ No units found.\n";
 } else {
-  data.forEach(item => {
+  sortedData.forEach(item => {
     shareText += `📍 ${item.unit || "Unspecified"} : B-${item.totalBookings} | O-${item.totalOrders}\n`;
   });
 }
@@ -125,21 +153,33 @@ if (navigator.share) {
         <Table.Root variant="surface">
           <Table.Header>
             <Table.Row>
-              <Table.ColumnHeaderCell>Unit Name</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell align="right">Total Bookings</Table.ColumnHeaderCell>
-              <Table.ColumnHeaderCell align="right">Total Orders</Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell>
+                <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort('unit')}>
+                  Unit Name <SortIcon columnKey="unit" />
+                </div>
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">
+                <div className="flex items-center justify-end cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort('totalBookings')}>
+                  Total Bookings <SortIcon columnKey="totalBookings" />
+                </div>
+              </Table.ColumnHeaderCell>
+              <Table.ColumnHeaderCell align="right">
+                <div className="flex items-center justify-end cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort('totalOrders')}>
+                  Total Orders <SortIcon columnKey="totalOrders" />
+                </div>
+              </Table.ColumnHeaderCell>
             </Table.Row>
           </Table.Header>
 
           <Table.Body>
-            {data.length === 0 ? (
+            {sortedData.length === 0 ? (
               <Table.Row>
                 <Table.Cell colSpan={3} style={{ textAlign: "center", padding: "2rem" }}>
                   <Text color="gray">No units found</Text>
                 </Table.Cell>
               </Table.Row>
             ) : (
-              data.map((item, index) => (
+              sortedData.map((item, index) => (
                 <Table.Row key={index}>
                   <Table.RowHeaderCell>{item.unit || 'Unspecified'}</Table.RowHeaderCell>
                   <Table.Cell align="right">{item.totalBookings}</Table.Cell>
@@ -148,7 +188,7 @@ if (navigator.share) {
               ))
             )}
             
-            {data.length > 0 && (
+            {sortedData.length > 0 && (
               <Table.Row style={{ backgroundColor: "var(--gray-3)" }}>
                 <Table.RowHeaderCell><Text weight="bold">Total</Text></Table.RowHeaderCell>
                 <Table.Cell align="right"><Text weight="bold">{overallBookings}</Text></Table.Cell>
