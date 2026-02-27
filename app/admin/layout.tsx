@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Flex, IconButton, Text } from "@radix-ui/themes";
-import { LayoutDashboard, LogOut, Menu, Settings, Users, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, Settings, Users, X, PieChart, ListOrdered } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -27,6 +27,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const menuItems = [
     { name: "Dashboard", icon: LayoutDashboard, href: "/admin" },
+    { name: "Sector Wise", icon: PieChart, href: "/admin/sectorwise" },
+    { name: "Unit Wise", icon: ListOrdered, href: "/admin/unitwise" },
     // { name: "Bookings", icon: Users, href: "/admin/bookings" },
     // { name: "Settings", icon: Settings, href: "/admin/settings" },
   ];

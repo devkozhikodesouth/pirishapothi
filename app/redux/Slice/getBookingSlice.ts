@@ -32,7 +32,7 @@ export const fetchBookings = createAsyncThunk(
     try {
       const query = new URLSearchParams({
         page: params.page.toString(),
-        limit: "10",
+        limit: "20",
         ...(params.search && { search: params.search }),
         ...(params.sector && { sector: params.sector }),
         ...(params.unit && { unit: params.unit }),
