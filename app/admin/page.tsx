@@ -12,7 +12,7 @@ import { ArrowUp, ArrowDown, ArrowUpDown, Share2, Check } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/app/redux/store/store";
-import { fetchBookings, setPage } from "@/app/redux/Slice/getBookingSlice";
+import { fetchBookings, setPage, setLimit } from "@/app/redux/Slice/getBookingSlice";
 import { fetchSectors } from "@/app/redux/Slice/sectorSlice";
 import { fetchUnits } from "@/app/redux/Slice/unitSlice";
 import { useDebouncedCallback } from "use-debounce";
@@ -21,7 +21,7 @@ export default function BookingsTable({ setTotalCount }: any) {
   const dispatch = useDispatch<AppDispatch>();
   
   // Bookings State
-  const { list, loading, page, pages, total } = useSelector(
+  const { list, loading, page, pages, total, limit } = useSelector(
     (state: RootState) => state.getBooking
   );
 
@@ -53,6 +53,7 @@ export default function BookingsTable({ setTotalCount }: any) {
     dispatch(
       fetchBookings({
         page,
+        limit,
         search: searchQuery,
         sector: sector === "all" ? "" : sector,
         unit: unit === "all" ? "" : unit,
@@ -60,7 +61,7 @@ export default function BookingsTable({ setTotalCount }: any) {
         sortOrder: sortConfig?.order,
       })
     );
-  }, [dispatch, page, searchQuery, sector, unit, sortConfig]);
+  }, [dispatch, page, limit, searchQuery, sector, unit, sortConfig]);
 
   // Debounced search for Place
   const handleSearch = useDebouncedCallback((value: string) => {
@@ -77,6 +78,10 @@ export default function BookingsTable({ setTotalCount }: any) {
   const handleUnitChange = (value: string) => {
     setUnit(value);
     dispatch(setPage(1));
+  };
+
+  const handleLimitChange = (value: string) => {
+    dispatch(setLimit(Number(value)));
   };
 
   const handleSort = (field: string) => {
@@ -115,7 +120,7 @@ if(unit !== "all"){
       shareText += "❌ No bookings found.\n";
     } else {
       list.forEach((b: any) => {
-        shareText += `👤 ${b.name} ${b.place} - ${b.orderCount}\n`;
+        shareText += `👤 ${b.name} ${b.place} - ${b.orderCount}📦\n`;
       });
     }
 
@@ -123,8 +128,7 @@ if(unit !== "all"){
     const pageOrders = list.reduce((acc: any, b: any) => acc + b.orderCount, 0);
 
     shareText += `
-✅ *Page Bookings : ${pageBookings}*
-📦 *Page Orders : ${pageOrders}*
+📦 *Total Orders : ${pageOrders}*
 
 🔗 poonoorsahityotsav.online
 
@@ -194,6 +198,15 @@ if(unit !== "all"){
           }}
           defaultValue={searchQuery}
         />
+
+        <Select.Root value={limit?.toString() || "30"} onValueChange={handleLimitChange}>
+          <Select.Trigger placeholder="Per Page" />
+          <Select.Content>
+            <Select.Item value="20">20 / page</Select.Item>
+            <Select.Item value="50">50 / page</Select.Item>
+            <Select.Item value="100">100 / page</Select.Item>
+          </Select.Content>
+        </Select.Root>
 
         <Button variant="soft" onClick={handleShare} disabled={list.length === 0}>
           {isCopied ? (

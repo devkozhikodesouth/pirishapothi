@@ -7,6 +7,7 @@ interface BookingState {
   page: number;
   pages: number;
   total: number;
+  limit: number;
 }
 
 const initialState: BookingState = {
@@ -16,6 +17,7 @@ const initialState: BookingState = {
   page: 1,
   pages: 1,
   total: 0,
+  limit: 20, // Default limit
 };
 
 export const fetchBookings = createAsyncThunk(
@@ -23,6 +25,7 @@ export const fetchBookings = createAsyncThunk(
   async (
     params: {
       page: number;
+      limit?: number;
       search?: string;
       sector?: string;
       unit?: string;
@@ -34,7 +37,7 @@ export const fetchBookings = createAsyncThunk(
     try {
       const query = new URLSearchParams({
         page: params.page.toString(),
-        limit: "20",
+        limit: params.limit ? params.limit.toString() : "30",
         ...(params.search && { search: params.search }),
         ...(params.sector && { sector: params.sector }),
         ...(params.unit && { unit: params.unit }),
@@ -61,6 +64,10 @@ const   getBookingsSlice = createSlice({
     setPage(state, action) {
       state.page = action.payload;
     },
+    setLimit(state, action) {
+      state.limit = action.payload;
+      state.page = 1; // Reset to page 1 when limit changes
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -82,5 +89,5 @@ const   getBookingsSlice = createSlice({
   },
 });
 
-export const { setPage } = getBookingsSlice.actions;
+export const { setPage, setLimit } = getBookingsSlice.actions;
 export default getBookingsSlice.reducer;

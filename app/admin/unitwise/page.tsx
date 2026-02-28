@@ -81,12 +81,11 @@ if (sortedData.length === 0) {
   shareText += "❌ No units found.\n";
 } else {
   sortedData.forEach(item => {
-    shareText += `📍 ${item.unit || "Unspecified"} : B-${item.totalBookings} | O-${item.totalOrders}\n`;
+    shareText += `📍 ${item.unit || "Unspecified"} - ${item.totalOrders}📦\n`;
   });
 }
 
 shareText += `
-✅ *Total Bookings : ${overallBookings}*
 📦 *Total Orders : ${overallOrders}*
 
 🔗 poonoorsahityotsav.online

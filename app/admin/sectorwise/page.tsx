@@ -97,12 +97,11 @@ if (sortedData.length === 0) {
   shareText += "❌ No sectors found.\n";
 } else {
   sortedData.forEach(item => {
-    shareText += `📍 ${item.sector || "Unspecified"} : B-${item.totalBookings} | O-${item.totalOrders}\n`;
+    shareText += `📍 ${item.sector || "Unspecified"} - ${item.totalOrders}📦\n`;
   });
 }
 
 shareText += `
-✅ *Total Bookings : ${overallBookings}*
 📦 *Total Orders : ${overallOrders}*
 
 🔗 poonoorsahityotsav.online
