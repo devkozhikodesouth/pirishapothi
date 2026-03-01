@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 import Booking from "@/app/models/booking";
 import { connectDB } from "@/app/lib/mongodb";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const sector = searchParams.get("sector");
+
     await connectDB();
 
-    const data = await Booking.aggregate([
+    const pipeline: any[] = [];
+
+    if (sector) {
+      pipeline.push({ $match: { sector } });
+    }
+
+    pipeline.push(
       {
         $group: {
           _id: "$unit",
@@ -24,8 +33,10 @@ export async function GET() {
       },
       {
         $sort: { unit: 1 }, 
-      },
-    ]);
+      }
+    );
+
+    const data = await Booking.aggregate(pipeline);
 
     return NextResponse.json(
       { message: "Unit-wise data fetched successfully", data },
