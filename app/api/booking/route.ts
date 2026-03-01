@@ -65,6 +65,7 @@ export async function GET(req: Request) {
     const search = searchParams.get("search");
     const sector = searchParams.get("sector");
     const unit = searchParams.get("unit");
+    const today = searchParams.get("today");
 
     const sortField = searchParams.get("sortField") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? 1 : -1;
@@ -80,6 +81,17 @@ export async function GET(req: Request) {
     }
     if (sector) query.sector = sector;
     if (unit) query.unit = unit;
+
+    if (today === "true") {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      query.createdAt = {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      };
+    }
 
     const [data, total] = await Promise.all([
       Booking.find(query)

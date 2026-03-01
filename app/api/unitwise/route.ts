@@ -6,13 +6,30 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const sector = searchParams.get("sector");
+    const today = searchParams.get("today");
 
     await connectDB();
 
     const pipeline: any[] = [];
+    const matchStage: any = {};
 
     if (sector) {
-      pipeline.push({ $match: { sector } });
+      matchStage.sector = sector;
+    }
+
+    if (today === "true") {
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const endOfDay = new Date();
+      endOfDay.setHours(23, 59, 59, 999);
+      matchStage.createdAt = {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      };
+    }
+
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
     }
 
     pipeline.push(

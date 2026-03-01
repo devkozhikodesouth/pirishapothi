@@ -2,13 +2,38 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Container, Heading, SegmentedControl, TextField, Button, Box, Text, Table, Card, ScrollArea, Spinner, Flex, Badge } from "@radix-ui/themes";
+import {
+  Container,
+  Heading,
+  SegmentedControl,
+  TextField,
+  Button,
+  Box,
+  Text,
+  Table,
+  Card,
+  ScrollArea,
+  Spinner,
+  Flex,
+  Badge,
+} from "@radix-ui/themes";
 import { getSectorNameByCode } from "@/app/lib/sectorCodes";
 import { Search, ArrowUp, ArrowDown, Share2, Check } from "lucide-react";
 
-const SortIcon = ({ field, sortConfig }: { field: string, sortConfig: { field: string, order: "asc" | "desc" } }) => {
-  if (sortConfig.field !== field) return <ArrowDown size={14} className="ml-1 text-gray-400 opacity-50" />;
-  return sortConfig.order === "asc" ? <ArrowUp size={14} className="ml-1" /> : <ArrowDown size={14} className="ml-1" />;
+const SortIcon = ({
+  field,
+  sortConfig,
+}: {
+  field: string;
+  sortConfig: { field: string; order: "asc" | "desc" };
+}) => {
+  if (sortConfig.field !== field)
+    return <ArrowDown size={14} className="ml-1 text-gray-400 opacity-50" />;
+  return sortConfig.order === "asc" ? (
+    <ArrowUp size={14} className="ml-1" />
+  ) : (
+    <ArrowDown size={14} className="ml-1" />
+  );
 };
 
 export default function SectorDetailsPage() {
@@ -23,15 +48,21 @@ export default function SectorDetailsPage() {
 
   const [activeTab, setActiveTab] = useState("all-orders");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortConfig, setSortConfig] = useState<{ field: string; order: "asc" | "desc" }>({ field: "orderCount", order: "desc" });
+  const [sortConfig, setSortConfig] = useState<{
+    field: string;
+    order: "asc" | "desc";
+  }>({ field: "orderCount", order: "desc" });
   const [isCopied, setIsCopied] = useState(false);
+  const [filterToday, setFilterToday] = useState(false);
 
   useEffect(() => {
     if (sectorName) {
       const fetchOrders = async () => {
         setOrdersLoading(true);
         try {
-          const res = await fetch(`/api/booking?sector=${sectorName}&limit=1000`);
+          const res = await fetch(
+            `/api/booking?sector=${sectorName}&limit=1000${filterToday ? "&today=true" : ""}`,
+          );
           const data = await res.json();
           setOrders(data.data || data.list || []);
         } catch (error) {
@@ -44,7 +75,9 @@ export default function SectorDetailsPage() {
       const fetchUnitData = async () => {
         setUnitLoading(true);
         try {
-          const res = await fetch(`/api/unitwise?sector=${sectorName}`);
+          const res = await fetch(
+            `/api/unitwise?sector=${sectorName}${filterToday ? "&today=true" : ""}`,
+          );
           const data = await res.json();
           setUnitData(data.data || []);
         } catch (error) {
@@ -57,23 +90,26 @@ export default function SectorDetailsPage() {
       fetchOrders();
       fetchUnitData();
     }
-  }, [sectorName]);
+  }, [sectorName, filterToday]);
 
   // Handle Share Logic
   const handleShare = async () => {
-    let shareText = `🌙✨ *പെരുന്നാൾ പിരിശം – സാഹിത്യോത്സവിനൊപ്പം* ✨🌙\n\n*പിരിശപ്പൊതി* 🎁\n\n📊 *Bookings List*\n\n`;
-    
+    let shareText = `🌙✨ *പെരുന്നാൾ പിരിശം – സാഹിത്യോത്സവിനൊപ്പം* ✨🌙\n\n*പിരിശപ്പൊതി* 🎁\n\n📊 *Unit Status*\n\n`;
+
     shareText += `📍 *Sector : ${sectorName}*\n\n`;
 
-    if (filteredOrders.length === 0) {
-      shareText += "❌ No bookings found.\n";
+    if (filteredUnits.length === 0) {
+      shareText += "❌ No units found.\n";
     } else {
-      filteredOrders.forEach((b: any) => {
-        shareText += `👤 ${b.name} ${b.unit || ""} - ${b.orderCount}📦\n`;
+      filteredUnits.forEach((u: any) => {
+        shareText += `🏢 ${u.unit} - ${u.totalOrders}📦\n`;
       });
     }
 
-    const totalOrders = filteredOrders.reduce((acc, b) => acc + (b.orderCount || 0), 0);
+    const totalOrders = unitData.reduce(
+      (acc, unit) => acc + (unit.totalOrders || 0),
+      0,
+    );
 
     shareText += `\n📦 *Total Orders : ${totalOrders}*\n\n🔗 poonoorsahityotsav.online\n\n©️ Lit Crew – Sahityotsav @ Poonoor`;
 
@@ -126,9 +162,9 @@ export default function SectorDetailsPage() {
           ? valA.localeCompare(valB)
           : valB.localeCompare(valA);
       }
-      
-      return sortConfig.order === "asc" 
-        ? (valA as number) - (valB as number) 
+
+      return sortConfig.order === "asc"
+        ? (valA as number) - (valB as number)
         : (valB as number) - (valA as number);
     });
 
@@ -147,61 +183,103 @@ export default function SectorDetailsPage() {
           ? valA.localeCompare(valB)
           : valB.localeCompare(valA);
       }
-      
-      return sortConfig.order === "asc" 
-        ? (valA as number) - (valB as number) 
+
+      return sortConfig.order === "asc"
+        ? (valA as number) - (valB as number)
         : (valB as number) - (valA as number);
     });
 
-  const totalOrdersCount = unitData.reduce((acc, unit) => acc + (unit.totalOrders || 0), 0);
-  const totalBookingsCount = unitData.reduce((acc, unit) => acc + (unit.totalBookings || 0), 0);
+  const totalOrdersCount = unitData.reduce(
+    (acc, unit) => acc + (unit.totalOrders || 0),
+    0,
+  );
+  const totalBookingsCount = unitData.reduce(
+    (acc, unit) => acc + (unit.totalBookings || 0),
+    0,
+  );
 
-  if (!sectorName) return <Container py="9"><Heading align="center" color="red">Invalid Sector</Heading></Container>;
+  if (!sectorName)
+    return (
+      <Container py="9">
+        <Heading align="center" color="red">
+          Invalid Sector
+        </Heading>
+      </Container>
+    );
 
   return (
     <Container size="4" py="9" px="4">
       <Flex justify="between" align="center" mb="6" wrap="wrap" gap="4">
-        <Heading size="8" style={{ textTransform: "capitalize" }}>{sectorName} Sector</Heading>
+        <Heading size="8" style={{ textTransform: "capitalize" }}>
+          {sectorName} Sector
+        </Heading>
         <Flex gap="3" align="center">
-          <Badge size="3" color="amber" variant="soft">Orders: {totalOrdersCount}</Badge>
-          <Badge size="3" color="green" variant="soft">Bookings: {totalBookingsCount}</Badge>
-          <Button variant="soft" onClick={handleShare} color={isCopied ? "green" : "blue"}>
-            {isCopied ? <Check size={16} /> : <Share2 size={16} />} 
-            {isCopied ? "Copied!" : "Share List"}
+          <Badge size="3" color="amber" variant="soft">
+            Orders: {totalOrdersCount}
+          </Badge>
+          <Badge size="3" color="green" variant="soft">
+            Bookings: {totalBookingsCount}
+          </Badge>
+          <Button
+            variant="soft"
+            onClick={handleShare}
+            color={isCopied ? "green" : "blue"}
+          >
+            {isCopied ? <Check size={16} /> : <Share2 size={16} />}
+            {isCopied ? "Copied!" : "Unit Status"}
           </Button>
         </Flex>
       </Flex>
 
       <Flex justify="center" mb="6">
-        <SegmentedControl.Root value={activeTab} onValueChange={(val) => {
-          setActiveTab(val);
-          // Reset sort correctly when switching tabs
-          if (val === "unit-wise") {
-            setSortConfig({ field: "totalOrders", order: "desc" });
-          } else {
-            setSortConfig({ field: "orderCount", order: "desc" });
-          }
-        }}>
-          <SegmentedControl.Item value="all-orders">All Orders</SegmentedControl.Item>
-          <SegmentedControl.Item value="unit-wise">Unit Wise</SegmentedControl.Item>
+        <SegmentedControl.Root
+          value={activeTab}
+          onValueChange={(val) => {
+            setActiveTab(val);
+            // Reset sort correctly when switching tabs
+            if (val === "unit-wise") {
+              setSortConfig({ field: "totalOrders", order: "desc" });
+            } else {
+              setSortConfig({ field: "orderCount", order: "desc" });
+            }
+          }}
+        >
+          <SegmentedControl.Item value="all-orders">
+            All Orders
+          </SegmentedControl.Item>
+          <SegmentedControl.Item value="unit-wise">
+            Unit Wise
+          </SegmentedControl.Item>
         </SegmentedControl.Root>
       </Flex>
 
       <Flex justify="between" mb="4" gap="4">
-        <TextField.Root 
-            placeholder="Search by name, place, unit..." 
-            style={{ flexGrow: 1 }} 
-            value={searchQuery} 
-            onChange={(e) => setSearchQuery(e.target.value)}
+        <TextField.Root
+          placeholder="Search by name, place, unit..."
+          style={{ flexGrow: 1 }}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         >
-          <TextField.Slot><Search size={16}/></TextField.Slot>
+          <TextField.Slot>
+            <Search size={16} />
+          </TextField.Slot>
         </TextField.Root>
+        <Button
+          variant={filterToday ? "solid" : "soft"}
+          color={filterToday ? "amber" : "gray"}
+          onClick={() => setFilterToday(!filterToday)}
+          style={{ cursor: "pointer" }}
+        >
+          {filterToday ? "Showing Today's List" : "Today's List"}
+        </Button>
       </Flex>
 
       <Card size="3">
         <ScrollArea type="always" style={{ height: 500 }}>
           {ordersLoading || unitLoading ? (
-            <Flex align="center" justify="center" p="5"><Spinner size="3" /></Flex>
+            <Flex align="center" justify="center" p="5">
+              <Spinner size="3" />
+            </Flex>
           ) : (
             <Table.Root variant="surface">
               <Table.Header>
@@ -210,41 +288,76 @@ export default function SectorDetailsPage() {
                   {activeTab === "all-orders" ? (
                     <>
                       <Table.ColumnHeaderCell>
-                        <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("name")}>
+                        <div
+                          className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("name")}
+                        >
                           Name <SortIcon field="name" sortConfig={sortConfig} />
                         </div>
                       </Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell>
-                        <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("place")}>
-                          Place <SortIcon field="place" sortConfig={sortConfig} />
+                        <div
+                          className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("place")}
+                        >
+                          Place{" "}
+                          <SortIcon field="place" sortConfig={sortConfig} />
                         </div>
                       </Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell>
-                        <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("unit")}>
+                        <div
+                          className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("unit")}
+                        >
                           Unit <SortIcon field="unit" sortConfig={sortConfig} />
                         </div>
                       </Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell justify="center">
-                        <div className="flex items-center justify-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("orderCount")}>
-                          Orders <SortIcon field="orderCount" sortConfig={sortConfig} />
+                        <div
+                          className="flex items-center justify-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("orderCount")}
+                        >
+                          Orders{" "}
+                          <SortIcon
+                            field="orderCount"
+                            sortConfig={sortConfig}
+                          />
                         </div>
                       </Table.ColumnHeaderCell>
                     </>
                   ) : (
                     <>
                       <Table.ColumnHeaderCell>
-                        <div className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("unit")}>
-                          Unit Name <SortIcon field="unit" sortConfig={sortConfig} />
+                        <div
+                          className="flex items-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("unit")}
+                        >
+                          Unit Name{" "}
+                          <SortIcon field="unit" sortConfig={sortConfig} />
                         </div>
                       </Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell justify="center">
-                        <div className="flex items-center justify-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("totalBookings")}>
-                          Total Bookings <SortIcon field="totalBookings" sortConfig={sortConfig} />
+                        <div
+                          className="flex items-center justify-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("totalBookings")}
+                        >
+                          Total Bookings{" "}
+                          <SortIcon
+                            field="totalBookings"
+                            sortConfig={sortConfig}
+                          />
                         </div>
                       </Table.ColumnHeaderCell>
                       <Table.ColumnHeaderCell justify="center">
-                        <div className="flex items-center justify-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded" onClick={() => handleSort("totalOrders")}>
-                          Total Orders <SortIcon field="totalOrders" sortConfig={sortConfig} />
+                        <div
+                          className="flex items-center justify-center cursor-pointer hover:bg-gray-100 p-1 -m-1 rounded"
+                          onClick={() => handleSort("totalOrders")}
+                        >
+                          Total Orders{" "}
+                          <SortIcon
+                            field="totalOrders"
+                            sortConfig={sortConfig}
+                          />
                         </div>
                       </Table.ColumnHeaderCell>
                     </>
@@ -252,7 +365,10 @@ export default function SectorDetailsPage() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {(activeTab === "all-orders" ? filteredOrders : filteredUnits).map((item, i) => (
+                {(activeTab === "all-orders"
+                  ? filteredOrders
+                  : filteredUnits
+                ).map((item, i) => (
                   <Table.Row key={i}>
                     <Table.Cell>{i + 1}</Table.Cell>
                     {activeTab === "all-orders" ? (
@@ -260,13 +376,19 @@ export default function SectorDetailsPage() {
                         <Table.Cell>{item.name}</Table.Cell>
                         <Table.Cell>{item.place}</Table.Cell>
                         <Table.Cell>{item.unit}</Table.Cell>
-                        <Table.Cell justify="center"><Badge color="blue">{item.orderCount}</Badge></Table.Cell>
+                        <Table.Cell justify="center">
+                          <Badge color="blue">{item.orderCount}</Badge>
+                        </Table.Cell>
                       </>
                     ) : (
                       <>
                         <Table.Cell>{item.unit}</Table.Cell>
-                        <Table.Cell justify="center"><Badge color="green">{item.totalBookings}</Badge></Table.Cell>
-                        <Table.Cell justify="center"><Badge color="blue">{item.totalOrders}</Badge></Table.Cell>
+                        <Table.Cell justify="center">
+                          <Badge color="green">{item.totalBookings}</Badge>
+                        </Table.Cell>
+                        <Table.Cell justify="center">
+                          <Badge color="blue">{item.totalOrders}</Badge>
+                        </Table.Cell>
                       </>
                     )}
                   </Table.Row>
