@@ -94,24 +94,42 @@ export default function SectorDetailsPage() {
 
   // Handle Share Logic
   const handleShare = async () => {
-    let shareText = `🌙✨ *പെരുന്നാൾ പിരിശം – സാഹിത്യോത്സവിനൊപ്പം* ✨🌙\n\n*പിരിശപ്പൊതി* 🎁\n\n📊 *Unit Status*\n\n`;
+    let shareText = `🌙✨ *പെരുന്നാൾ പിരിശം – സാഹിത്യോത്സവിനൊപ്പം* ✨🌙\n\n*പിരിശപ്പൊതി* 🎁\n\n`;
 
-    shareText += `📍 *Sector : ${sectorName}*\n\n`;
+    if (activeTab === "all-orders") {
+      shareText += `📊 *Bookings List*\n\n`;
+      shareText += `📍 *Sector : ${sectorName}*\n\n`;
 
-    if (filteredUnits.length === 0) {
-      shareText += "❌ No units found.\n";
+      if (filteredOrders.length === 0) {
+        shareText += "❌ No bookings found.\n";
+      } else {
+        filteredOrders.forEach((b: any) => {
+          shareText += `👤 ${b.name} ${b.unit || ""} - ${b.orderCount}📦\n`;
+        });
+      }
+
+      const totalOrders = filteredOrders.reduce((acc, b) => acc + (b.orderCount || 0), 0);
+      shareText += `\n📦 *Total Orders : ${totalOrders}*\n\n`;
     } else {
-      filteredUnits.forEach((u: any) => {
-        shareText += `🏢 ${u.unit} - ${u.totalOrders}📦\n`;
-      });
+      shareText += `📊 *Unit Status*\n\n`;
+      shareText += `📍 *Sector : ${sectorName}*\n\n`;
+
+      if (filteredUnits.length === 0) {
+        shareText += "❌ No units found.\n";
+      } else {
+        filteredUnits.forEach((u: any) => {
+          shareText += `🏢 ${u.unit} - ${u.totalOrders}📦\n`;
+        });
+      }
+
+      const totalOrders = unitData.reduce(
+        (acc, unit) => acc + (unit.totalOrders || 0),
+        0,
+      );
+      shareText += `\n📦 *Total Orders : ${totalOrders}*\n\n`;
     }
 
-    const totalOrders = unitData.reduce(
-      (acc, unit) => acc + (unit.totalOrders || 0),
-      0,
-    );
-
-    shareText += `\n📦 *Total Orders : ${totalOrders}*\n\n🔗 poonoorsahityotsav.online\n\n©️ Lit Crew – Sahityotsav @ Poonoor`;
+    shareText += `🔗 poonoorsahityotsav.online\n\n©️ Lit Crew – Sahityotsav @ Poonoor`;
 
     if (navigator.share) {
       try {
@@ -226,7 +244,7 @@ export default function SectorDetailsPage() {
             color={isCopied ? "green" : "blue"}
           >
             {isCopied ? <Check size={16} /> : <Share2 size={16} />}
-            {isCopied ? "Copied!" : "Unit Status"}
+            {isCopied ? "Copied!" : activeTab === "all-orders" ? "Share List" : "Unit Status"}
           </Button>
         </Flex>
       </Flex>
