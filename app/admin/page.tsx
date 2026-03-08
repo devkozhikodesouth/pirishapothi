@@ -35,6 +35,7 @@ export default function BookingsTable({ setTotalCount }: any) {
   const [unit, setUnit] = useState("all");
   const [sortConfig, setSortConfig] = useState<{ field: string; order: "asc" | "desc" } | null>({ field: "createdAt", order: "desc" });
   const [isCopied, setIsCopied] = useState(false);
+  const [filterToday, setFilterToday] = useState(false);
 
   // Fetch initial sectors
   useEffect(() => {
@@ -59,9 +60,10 @@ export default function BookingsTable({ setTotalCount }: any) {
         unit: unit === "all" ? "" : unit,
         sortField: sortConfig?.field,
         sortOrder: sortConfig?.order,
+        today: filterToday,
       })
     );
-  }, [dispatch, page, limit, searchQuery, sector, unit, sortConfig]);
+  }, [dispatch, page, limit, searchQuery, sector, unit, sortConfig, filterToday]);
 
   // Debounced search for Place
   const handleSearch = useDebouncedCallback((value: string) => {
@@ -207,6 +209,18 @@ if(unit !== "all"){
             <Select.Item value="100">100 / page</Select.Item>
           </Select.Content>
         </Select.Root>
+        
+        <Button
+          variant={filterToday ? "solid" : "soft"}
+          color={filterToday ? "amber" : "gray"}
+          onClick={() => {
+            setFilterToday(!filterToday);
+            dispatch(setPage(1));
+          }}
+          style={{ cursor: "pointer" }}
+        >
+          {filterToday ? "Showing Today's List" : "Today's List"}
+        </Button>
 
         <Button variant="soft" onClick={handleShare} disabled={list.length === 0}>
           {isCopied ? (

@@ -29,6 +29,7 @@ export const fetchBookings = createAsyncThunk(
       search?: string;
       sector?: string;
       unit?: string;
+      today?: boolean;
       sortField?: string;
       sortOrder?: string;
     },
@@ -41,6 +42,7 @@ export const fetchBookings = createAsyncThunk(
         ...(params.search && { search: params.search }),
         ...(params.sector && { sector: params.sector }),
         ...(params.unit && { unit: params.unit }),
+        ...(params.today && { today: "true" }),
         ...(params.sortField && { sortField: params.sortField }),
         ...(params.sortOrder && { sortOrder: params.sortOrder }),
       });

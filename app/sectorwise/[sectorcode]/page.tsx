@@ -16,6 +16,7 @@ import {
   Spinner,
   Flex,
   Badge,
+  Select,
 } from "@radix-ui/themes";
 import { getSectorNameByCode } from "@/app/lib/sectorCodes";
 import { Search, ArrowUp, ArrowDown, Share2, Check } from "lucide-react";
@@ -54,6 +55,7 @@ export default function SectorDetailsPage() {
   }>({ field: "orderCount", order: "desc" });
   const [isCopied, setIsCopied] = useState(false);
   const [filterToday, setFilterToday] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState("all");
 
   useEffect(() => {
     if (sectorName) {
@@ -122,7 +124,7 @@ export default function SectorDetailsPage() {
         });
       }
 
-      const totalOrders = unitData.reduce(
+      const totalOrders = filteredUnits.reduce(
         (acc, unit) => acc + (unit.totalOrders || 0),
         0,
       );
@@ -160,6 +162,7 @@ export default function SectorDetailsPage() {
   // Sorting Logic
   const filteredOrders = orders
     .filter((order) => {
+      if (selectedUnit !== "all" && order.unit !== selectedUnit) return false;
       const query = searchQuery.toLowerCase();
       return (
         order.name?.toLowerCase().includes(query) ||
@@ -187,7 +190,10 @@ export default function SectorDetailsPage() {
     });
 
   const filteredUnits = unitData
-    .filter((u) => u.unit?.toLowerCase().includes(searchQuery.toLowerCase()))
+    .filter((u) => {
+      if (selectedUnit !== "all" && u.unit !== selectedUnit) return false;
+      return u.unit?.toLowerCase().includes(searchQuery.toLowerCase());
+    })
     .sort((a, b) => {
       let valA = a[sortConfig.field];
       let valB = b[sortConfig.field];
@@ -207,11 +213,11 @@ export default function SectorDetailsPage() {
         : (valB as number) - (valA as number);
     });
 
-  const totalOrdersCount = unitData.reduce(
+  const totalOrdersCount = filteredUnits.reduce(
     (acc, unit) => acc + (unit.totalOrders || 0),
     0,
   );
-  const totalBookingsCount = unitData.reduce(
+  const totalBookingsCount = filteredUnits.reduce(
     (acc, unit) => acc + (unit.totalBookings || 0),
     0,
   );
@@ -271,7 +277,7 @@ export default function SectorDetailsPage() {
         </SegmentedControl.Root>
       </Flex>
 
-      <Flex justify="between" mb="4" gap="4">
+      <Flex justify="between" mb="4" gap="4" wrap="wrap">
         <TextField.Root
           placeholder="Search by name, place, unit..."
           style={{ flexGrow: 1 }}
@@ -282,6 +288,19 @@ export default function SectorDetailsPage() {
             <Search size={16} />
           </TextField.Slot>
         </TextField.Root>
+        <Select.Root value={selectedUnit} onValueChange={setSelectedUnit}>
+          <Select.Trigger placeholder="Filter by Unit" />
+          <Select.Content position="popper">
+            <Select.Item value="all">All Units</Select.Item>
+            {unitData.map((u, i) => (
+              u.unit ? (
+                <Select.Item key={i} value={u.unit}>
+                  {u.unit}
+                </Select.Item>
+              ) : null
+            ))}
+          </Select.Content>
+        </Select.Root>
         <Button
           variant={filterToday ? "solid" : "soft"}
           color={filterToday ? "amber" : "gray"}

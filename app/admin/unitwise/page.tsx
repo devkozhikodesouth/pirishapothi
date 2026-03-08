@@ -15,12 +15,14 @@ export default function UnitWisePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [filterToday, setFilterToday] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: keyof UnitData; direction: 'asc' | 'desc' } | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
-        const response = await fetch("/api/unitwise");
+        const response = await fetch(`/api/unitwise${filterToday ? '?today=true' : ''}`);
         if (!response.ok) {
           throw new Error("Failed to fetch data");
         }
@@ -34,7 +36,7 @@ export default function UnitWisePage() {
     };
 
     fetchData();
-  }, []);
+  }, [filterToday]);
 
   const sortedData = useMemo(() => {
     let sortableData = [...data];
@@ -135,17 +137,28 @@ if (navigator.share) {
         <Heading size="6">
           Unit-Wise Summary
         </Heading>
-        <Button variant="soft" onClick={handleShare} disabled={data.length === 0}>
-          {isCopied ? (
-            <>
-              <Check size={16} /> Copied!
-            </>
-          ) : (
-            <>
-              <Share2 size={16} /> Share List
-            </>
-          )}
-        </Button>
+        <Flex gap="3">
+          <Button
+            variant={filterToday ? "solid" : "soft"}
+            color={filterToday ? "amber" : "gray"}
+            onClick={() => setFilterToday(!filterToday)}
+            style={{ cursor: "pointer" }}
+          >
+            {filterToday ? "Showing Today's List" : "Today's List"}
+          </Button>
+
+          <Button variant="soft" onClick={handleShare} disabled={data.length === 0}>
+            {isCopied ? (
+              <>
+                <Check size={16} /> Copied!
+              </>
+            ) : (
+              <>
+                <Share2 size={16} /> Share List
+              </>
+            )}
+          </Button>
+        </Flex>
       </Flex>
 
       <Card size="2" variant="surface">
