@@ -67,6 +67,7 @@ export async function GET(req: Request) {
     const unit = searchParams.get("unit");
     const today = searchParams.get("today");
 
+
     const sortField = searchParams.get("sortField") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") === "asc" ? 1 : -1;
 

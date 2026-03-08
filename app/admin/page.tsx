@@ -8,7 +8,7 @@ import {
   Table,
   Button,
 } from "@radix-ui/themes";
-import { ArrowUp, ArrowDown, ArrowUpDown, Share2, Check } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowUpDown, Share2, Check, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState, AppDispatch } from "@/app/redux/store/store";
@@ -157,6 +157,35 @@ if(unit !== "all"){
     }  
   };
 
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete booking for ${name}?`)) return;
+    
+    try {
+      const res = await fetch(`/api/booking/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        dispatch(
+          fetchBookings({
+            page,
+            limit,
+            search: searchQuery,
+            sector: sector === "all" ? "" : sector,
+            unit: unit === "all" ? "" : unit,
+            sortField: sortConfig?.field,
+            sortOrder: sortConfig?.order,
+            today: filterToday,
+          })
+        );
+      } else {
+        alert("Failed to delete booking");
+      }
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      alert("Error deleting booking");
+    }
+  };
+
   return (
     <Box>
       {/* FILTERS */}
@@ -265,6 +294,7 @@ if(unit !== "all"){
                 Unit <SortIcon field="unit" />
               </div>
             </Table.ColumnHeaderCell>
+            <Table.ColumnHeaderCell>Actions</Table.ColumnHeaderCell>
           </Table.Row>
         </Table.Header>
 
@@ -277,12 +307,22 @@ if(unit !== "all"){
               <Table.Cell>{b.orderCount}</Table.Cell>
               <Table.Cell>{b.sector}</Table.Cell>
               <Table.Cell>{b.unit}</Table.Cell>
+              <Table.Cell>
+                <Button 
+                  variant="ghost" 
+                  color="red" 
+                  onClick={() => handleDelete(b._id, b.name)}
+                  style={{ cursor: "pointer", padding: "4px" }}
+                >
+                  <Trash2 size={16} />
+                </Button>
+              </Table.Cell>
             </Table.Row>
           ))}
 
           {!loading && list.length === 0 && (
             <Table.Row>
-              <Table.Cell colSpan={6}>
+              <Table.Cell colSpan={7}>
                 <Text align="center" style={{ display: 'block', padding: '20px' }}>No results found</Text>
               </Table.Cell>
             </Table.Row>
@@ -290,7 +330,7 @@ if(unit !== "all"){
 
           {loading && list.length === 0 && (
              <Table.Row>
-              <Table.Cell colSpan={6}>
+              <Table.Cell colSpan={7}>
                 <Text align="center" style={{ display: 'block', padding: '20px' }} color="gray">Loading...</Text>
               </Table.Cell>
              </Table.Row>
