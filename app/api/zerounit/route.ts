@@ -8,7 +8,6 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
 
     await connectDB();
 
@@ -24,22 +23,17 @@ export async function GET(req: Request) {
       select: "sectorName",
     }).lean();
 
-    // Filter units that are NOT in unitsWithBookings
-    const zeroUnits = allUnits
-      .filter((u: any) => !unitsWithBookings.includes(u.unitName))
-      .map((u: any) => ({
-        unit: u.unitName,
-        sector: u.sectorId?.sectorName || "Unknown",
-      }));
+   const excludedSectors = ["Avilora", "Elettil", "Kizhakkoth"];
 
-    // Sort by sector, then unit
-    zeroUnits.sort((a, b) => {
-      if (a.sector === b.sector) {
-        return a.unit.localeCompare(b.unit);
-      }
-      return a.sector.localeCompare(b.sector);
-    });
-
+const zeroUnits = allUnits
+  .filter((u: any) => 
+    !unitsWithBookings.includes(u.unitName) &&
+    !excludedSectors.includes(u.sectorId?.sectorName)
+  )
+  .map((u: any) => ({
+    unit: u.unitName,
+    sector: u.sectorId?.sectorName || "Unknown",
+  }));
     return NextResponse.json(
       { message: "Zero unit data fetched successfully", data: zeroUnits },
       { status: 200 }
