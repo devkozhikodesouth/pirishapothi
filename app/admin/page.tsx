@@ -16,6 +16,7 @@ import { fetchBookings, setPage, setLimit } from "@/app/redux/Slice/getBookingSl
 import { fetchSectors } from "@/app/redux/Slice/sectorSlice";
 import { fetchUnits } from "@/app/redux/Slice/unitSlice";
 import { useDebouncedCallback } from "use-debounce";
+import * as XLSX from "xlsx";
 
 export default function BookingsTable({ setTotalCount }: any) {
   const dispatch = useDispatch<AppDispatch>();
@@ -157,6 +158,56 @@ if(unit !== "all"){
     }  
   };
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const query = new URLSearchParams({
+        page: "1",
+        limit: "100000", // Large limit to get all matching results
+        ...(searchQuery && { search: searchQuery }),
+        ...(sector && sector !== "all" && { sector }),
+        ...(unit && unit !== "all" && { unit }),
+        ...(filterToday && { today: "true" }),
+        ...(sortConfig?.field && { sortField: sortConfig.field }),
+        ...(sortConfig?.order && { sortOrder: sortConfig.order }),
+      });
+
+      const res = await fetch(`/api/booking?${query}`);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to fetch bookings for export");
+
+      const exportData = data.data.map((b: any) => ({
+        Name: b.name,
+        Phone: b.phone,
+        Place: b.place,
+        "Order Count": b.orderCount,
+        Sector: b.sector,
+        Unit: b.unit,
+        "Created At": new Date(b.createdAt).toLocaleString(),
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Bookings");
+      
+      let fileName = "bookings";
+      if (filterToday) fileName += "_today";
+      if (sector && sector !== "all") fileName += `_${sector}`;
+      if (unit && unit !== "all") fileName += `_${unit}`;
+      fileName += ".xlsx";
+
+      XLSX.writeFile(workbook, fileName);
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      alert("Error exporting to Excel. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to delete booking for ${name}?`)) return;
     
@@ -261,6 +312,10 @@ if(unit !== "all"){
               <Share2 size={16} /> Share List
             </>
           )}
+        </Button>
+
+        <Button variant="soft" color="green" onClick={handleExportExcel} disabled={isExporting || list.length === 0}>
+           {isExporting ? "Exporting..." : "Export Excel"}
         </Button>
       </Flex>
 

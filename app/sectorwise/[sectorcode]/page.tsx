@@ -20,6 +20,7 @@ import {
 } from "@radix-ui/themes";
 import { getSectorNameByCode } from "@/app/lib/sectorCodes";
 import { Search, ArrowUp, ArrowDown, Share2, Check } from "lucide-react";
+import * as XLSX from "xlsx";
 
 const SortIcon = ({
   field,
@@ -150,6 +151,47 @@ export default function SectorDetailsPage() {
     }
   };
 
+  const handleExportExcel = () => {
+    let exportData;
+    let fileName = `${sectorName}_`;
+
+    if (activeTab === "all-orders") {
+      exportData = filteredOrders.map((b: any, index: number) => ({
+        No: index + 1,
+        Name: b.name,
+        Phone: b.phone || b.phoneNumber,
+        Place: b.place,
+        "Order Count": b.orderCount,
+        Unit: b.unit,
+        "Created At": new Date(b.createdAt).toLocaleString(),
+      }));
+      fileName += "Orders";
+    } else {
+      exportData = filteredUnits.map((u: any, index: number) => ({
+        No: index + 1,
+        "Unit Name": u.unit,
+        "Total Bookings": u.totalBookings,
+        "Total Orders": u.totalOrders,
+      }));
+      fileName += "UnitWise";
+    }
+
+    if (filterToday) fileName += "_Today";
+    if (selectedUnit !== "all") fileName += `_${selectedUnit}`;
+    if (searchQuery) fileName += "_Filtered";
+    fileName += ".xlsx";
+
+    try {
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, activeTab === "all-orders" ? "Orders" : "UnitWise");
+      XLSX.writeFile(workbook, fileName);
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      alert("Error exporting to Excel. Please try again.");
+    }
+  };
+
   const handleSort = (field: string) => {
     setSortConfig((prev) => {
       if (prev?.field === field) {
@@ -251,6 +293,15 @@ export default function SectorDetailsPage() {
           >
             {isCopied ? <Check size={16} /> : <Share2 size={16} />}
             {isCopied ? "Copied!" : activeTab === "all-orders" ? "Share List" : "Unit Status"}
+          </Button>
+
+          <Button
+            variant="soft"
+            color="green"
+            onClick={handleExportExcel}
+            disabled={(activeTab === "all-orders" && filteredOrders.length === 0) || (activeTab === "unit-wise" && filteredUnits.length === 0)}
+          >
+            Export Excel
           </Button>
         </Flex>
       </Flex>
